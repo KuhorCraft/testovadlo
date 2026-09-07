@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGIBALANS MAPA</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+</head>
+<body>
+
+    <div class="map-container">
+        <svg id="europe-map" viewBox="0 0 800 650" width="100%" height="auto"></svg>
+    </div>
+
+    <div id="country-card" class="card hidden">
+        <button id="close-btn" class="close-btn">&times;</button>
+        <h1 id="country-title">Název země</h1>
+        <div id="country-content" class="content-body">
+            <p id="country-text"></p>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
