@@ -87,11 +87,22 @@ svg#europe-map {
     padding-right: 15px;
 }
 
+/* Úprava odstavců pro HTML obsah */
 .card p {
     font-size: 20px;
     line-height: 1.6;
     color: #222222;
-    white-space: pre-line; /* Uchová odřádkování v textu */
+    margin-bottom: 15px; /* Mezera pod odstavcem */
+}
+
+/* Stylování seznamu a odrážek */
+.card ul {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    margin-left: 30px; /* Odsazení odrážek od kraje */
+    font-size: 20px;
+    line-height: 1.6;
+    color: #222222;
 }
 
 .close-btn {
