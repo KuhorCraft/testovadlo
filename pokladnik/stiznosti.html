@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>STÍŽNOSTNÍ FORMULÁŘ - TŘÍDNÍ POKLADNA 1.E</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body bgcolor="#C0C0C0" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+  <!-- ZÁHLAVÍ -->
+  <center>
+    <table border="3" cellpadding="10" cellspacing="0" bgcolor="#FFFFCC" width="90%">
+      <tr>
+        <td align="center">
+          <font size="5" color="#000080"><b>OFICIÁLNÍ FORMULÁŘ PRO PODÁVÁNÍ STÍŽNOSTí</b></font><br>
+          <font size="4" color="#800000"><b>Oddělení pro řešení finančních nesrovnalostí třídy 1.E</b></font><br>
+          <hr size="2" color="#000080" width="80%">
+          <font size="2" color="#FF0000"><b>[ UPOZORNĚNÍ: ZNEUŽITÍ TOHOTO FORMULÁŘE NEBO UVÁDĚNÍ NEPRAVDIVÝCH ÚDAJŮ SE PŘÍSNĚ TRESTÁ! ]</b></font>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br>
+
+  <!-- NAVIGACE ZPĚT -->
+  <center>
+    <table border="1" cellpadding="5" cellspacing="0" bgcolor="#ECECEC" width="90%">
+      <tr>
+        <td align="center">
+          <font size="3"><b>Přejete si vrátit se zpět k přehledu plateb?</b></font><br><br>
+          <a href="index.html"><button class="retro-btn">&lt;&lt; ZPĚT NA HLAVNÍ STRANU</button></a>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br>
+
+  <!-- FORMULÁŘ PRO STÍŽNOSTI -->
+  <center>
+    <table border="2" cellpadding="8" cellspacing="0" bgcolor="#FFFFFF" width="90%">
+      <tr bgcolor="#000080">
+        <td><font color="#FFFFFF" size="4"><b> FORMULÁŘ STÍŽNOSTI NA FINANČNÍ OPERACE </b></font></td>
+      </tr>
+      <tr>
+        <td>
+          <font size="3" color="#000000">
+            <i>Vážený žáče, shledal-li jsi nesrovnalost či pochybení v evidenci finančních prostředků třídy 1.E, vyplňte prosím tento tiskopis. Vaše podání bude řádně zaevidováno a prošetřeno pokladníkem. Každé podané hlášení podléhá přísné kontrole.</i>
+          </font>
+          <br><br>
+          
+          <form onsubmit="alert('Stížnost byla úspěšně podána a zaevidována do archivu. Neoprávněné či lživé stížnosti budou postoupeny k disciplinárnímu řízení.'); return false;">
+            <table border="0" cellpadding="4" cellspacing="2" width="100%">
+              <tr>
+                <td width="30%"><b>Jméno a příjmení stěžovatele:</b></td>
+                <td><input type="text" size="40" class="retro-btn" placeholder="Např. Jan Novák" required></td>
+              </tr>
+              <tr>
+                <td><b>Evidenční číslo žáka:</b></td>
+                <td><input type="text" size="15" class="retro-btn" placeholder="Např. 1E-12"></td>
+              </tr>
+              <tr>
+                <td><b>Předmět stížnosti:</b></td>
+                <td>
+                  <select class="retro-btn">
+                    <option>-- Zvolte předmět nespokojenosti --</option>
+                    <option>Nesoulad zaplacené částky v tabulce</option>
+                    <option>Pochybnosti o hospodaření s pokladnou</option>
+                    <option>Chybějící potvrzení o platbě</option>
+                    <option>Jiné administrativní pochybení</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td valign="top"><b>Podrobný popis nesrovnalosti:</b><br><font size="1">Uveďte přesné okolnosti a data...</font></td>
+                <td>
+                  <textarea rows="6" cols="45" class="retro-btn" placeholder="Zde podrobně popište důvod Vaší stížnosti..." required></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td><b>Prohlášení:</b></td>
+                <td>
+                  <input type="checkbox" required> Prohlašuji, že všechna uvedená tvrzení jsou pravdivá a jsem si vědom(a) právních a disciplinárních důsledků v případě zneužití formuláře.
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="center">
+                  <br>
+                  <input type="submit" value="ODESLAT STÍŽNOST K PROVĚŘENÍ" class="retro-btn" style="background-color: #ECECEC; font-size: 14px; cursor: pointer;">
+                  &nbsp;&nbsp;&nbsp;
+                  <input type="reset" value="VYMAZAT FORMULÁŘ" class="retro-btn" style="background-color: #ECECEC; cursor: pointer;">
+                </td>
+              </tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br><hr size="3" color="#000080" width="90%"><br>
+
+  <!-- ZÁPATÍ -->
+  <center>
+    <font size="3" color="#808080">
+      Systém Pokladník v1.2 (c) 2026 Lukáš Horák.<br>
+      <a href="https://www.lukashorak.net" target="_blank">www.lukashorak.net</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="https://www.vzdelanylid.cz" target="_blank">www.vzdelanylid.cz</a><br>
+      Optimalizováno pro Microsoft Internet Explorer 6.0 a rozlišení 1024x768.
+    </font>
+  </center>
+
+</body>
+</html>

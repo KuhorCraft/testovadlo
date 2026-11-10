@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platba akce</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <h3>Uhrazení akce: <span id="nazev-akce"></span></h3>
+  <p>Žák: <span id="jmeno"></span></p>
+  <p>Částka k úhradě: <strong id="castka"></strong> Kč</p>
+
+  <div id="qr-container"></div>
+
+  <p><strong>IBAN:</strong> <span id="cislo-uctu"></span></p>
+  <p><strong>Variabilní symbol:</strong> <span id="vs"></span></p>
+  <p><strong>Zpráva pro příjemce:</strong> <span id="zprava"></span></p>
+
+  <hr>
+
+  <div id="volba-blok">
+    <p><b>Vyberte, jak je to s akcí. Dokud nevyberete, stránku nelze opustit.</b></p>
+    <button id="btn-zaplatil">Akci jsem zaplatil</button>
+    <button id="btn-nezaplatil">Akci jsem nezaplatil</button>
+  </div>
+  <p id="stav-volby"></p>
+
+  <p id="zpet" style="display:none"><a href="../index.html">&lt;&lt; Zpět na přehled</a></p>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyx9tM-CL5smo2dW-KBeEwz3yqg3O-0QOprWT_IVT2D5Xao6t-6RbRT2c2Fcvuvca5TiQ/exec';
+    const IBAN = 'CZ9862106701002221734373';
+
+    // Údaje z adresy, např. platba.html?jmeno=Novak+Jan&akce=Kino&castka=150.00&vs=08154
+    const params = new URLSearchParams(window.location.search);
+    const jmeno = params.get('jmeno') || '';
+    const akce = params.get('akce') || '';
+    const castka = parseFloat(params.get('castka'));
+    const vs = params.get('vs') || '';
+
+    const platnaData = !!jmeno && !!akce && /^\d{5}$/.test(vs) && castka > 0;
+
+    // Dokud žák nevybere volbu, stránku nelze opustit (u neplatné adresy ne)
+    let volbaOdeslana = !platnaData;
+
+    function vytvorZpravu(text) {
+      // SPD nepřijme diakritiku ani hvězdičku (je to oddělovač), max. 60 znaků
+      return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\*/g, ' ')
+        .slice(0, 60);
+    }
+
+    if (platnaData) {
+      const castkaText = castka.toFixed(2);
+      const zprava = vytvorZpravu(`${jmeno} - ${akce}`);
+      const spd = `SPD*1.0*ACC:${IBAN}*AM:${castkaText}*CC:CZK*X-VS:${vs}*MSG:${zprava}`;
+
+      // textContent místo innerHTML, aby se z adresy nemohl vložit kód
+      document.getElementById('nazev-akce').textContent = akce;
+      document.getElementById('jmeno').textContent = jmeno;
+      document.getElementById('castka').textContent = castkaText;
+      document.getElementById('cislo-uctu').textContent = IBAN;
+      document.getElementById('vs').textContent = vs;
+      document.getElementById('zprava').textContent = zprava;
+
+      const qrCil = document.getElementById('qr-container');
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrCil, { text: spd, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+      } else {
+        qrCil.textContent = 'QR kód nelze vygenerovat, knihovna se nenačetla.';
+      }
+    } else {
+      document.getElementById('nazev-akce').textContent = 'Chybí údaje k platbě';
+      document.getElementById('qr-container').textContent = 'Vraťte se na přehled a zvolte platbu znovu.';
+      document.getElementById('volba-blok').style.display = 'none';
+      document.getElementById('zpet').style.display = 'block';
+    }
+
+    // Zavření karty nebo obnovení stránky: prohlížeč zobrazí dotaz „Opustit stránku?“
+    window.addEventListener('beforeunload', (e) => {
+      if (!volbaOdeslana) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Tlačítko zpět v prohlížeči zůstane na stránce
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', () => {
+      if (!volbaOdeslana) history.pushState(null, '', location.href);
+    });
+
+    async function odesliVolbu(volba) {
+      const blok = document.getElementById('volba-blok');
+      const tlacitka = blok.querySelectorAll('button');
+      const stavEl = document.getElementById('stav-volby');
+
+      tlacitka.forEach(b => b.disabled = true);
+      stavEl.textContent = 'Odesílám…';
+
+      try {
+        const parametry = new URLSearchParams({ funkce: 'volba', vs: vs, volba: volba, t: Date.now() });
+        const odpoved = await fetch(WEB_APP_URL + '?' + parametry.toString(), { cache: 'no-store' });
+        const text = await odpoved.text();
+        if (!text) throw new Error('server neodpověděl');
+        const data = JSON.parse(text);
+        if (!data.ok) throw new Error(data.chyba || 'neznámá chyba');
+
+        volbaOdeslana = true;
+        blok.style.display = 'none';
+        document.getElementById('zpet').style.display = 'block';
+
+        if (data.stav === 'potvrzeno') {
+          stavEl.textContent = 'Platba už byla pokladníkem potvrzena.';
+        } else if (volba === 'zaplatil') {
+          stavEl.textContent = 'Zaznamenáno: akce je označena jako zaplacená. Pokladník ji potvrdí po kontrole účtu.';
+        } else {
+          stavEl.textContent = 'Zaznamenáno: akce je označena jako nezaplacená.';
+        }
+      } catch (err) {
+        tlacitka.forEach(b => b.disabled = false);
+        stavEl.textContent = 'Chyba: ' + err.message + '. Zkuste to prosím znovu.';
+      }
+    }
+
+    document.getElementById('btn-zaplatil').addEventListener('click', () => odesliVolbu('zaplatil'));
+    document.getElementById('btn-nezaplatil').addEventListener('click', () => odesliVolbu('nezaplatil'));
+  </script>
+</body>
+</html>

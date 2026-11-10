@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platba akce</title>
+    <!-- Načtení knihovny pro generování QR kódů -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="platba-box">
+        <h3>Uhrazení akce: <span id="nazev-akce">Kino</span></h3>
+        <p>Částka k úhradě: <strong id="castka">150.00</strong> Kč</p>
+
+        <!-- Zde se vygeneruje QR kód -->
+        <div id="qr-container" style="margin-bottom: 15px;"></div>
+
+        <!-- Textové údaje -->
+        <div class="manual-info">
+            <p><strong>IBAN:</strong> <span id="cislo-uctu"></span></p>
+            <p><strong>Variabilní symbol:</strong> <span id="vs"></span></p>
+            <p><strong>Zpráva pro příjemce:</strong> <span id="zprava"></span></p>
+        </div>
+    </div>
+
+    <script>
+        const platbaData = {
+            iban: "CZ9862106701002221734373",
+            amount: "150.00",
+            vs: "102015",
+            message: "Novak Jan - Kino"
+        };6
+
+        function vygenerujQRPlatbu(data) {
+            // Sestavení standardního českého řetězce SPD (Short Payment Descriptor)
+            let spdString = `SPD*1.0*ACC:${data.iban}*AM:${data.amount}*CC:CZK`;
+            
+            if (data.vs) {
+                spdString += `*X-VS:${data.vs}`;
+            }
+            if (data.message) {
+                // Odstranění diakritiky pro maximální kompatibilitu s bankami
+                const cleanMsg = data.message.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                spdString += `*MSG:${cleanMsg}`;
+            }
+
+            // Vyčištění kontejneru a vygenerování QR kódu
+            const container = document.getElementById("qr-container");
+            container.innerHTML = "";
+            
+            new QRCode(container, {
+                text: spdString,
+                width: 200,
+                height: 200,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            // Vypsání údajů do textové části
+            document.getElementById("cislo-uctu").innerText = data.iban;
+            document.getElementById("castka").innerText = data.amount;
+            document.getElementById("vs").innerText = data.vs;
+            document.getElementById("zprava").innerText = data.message;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            vygenerujQRPlatbu(platbaData);
+        });
+    </script>
+</body>
+</html>

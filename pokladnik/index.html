@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>TŘÍDNÍ POKLADNA 1.E</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body bgcolor="#C0C0C0" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+  <!-- ZÁHLAVÍ -->
+  <center>
+    <table border="3" cellpadding="10" cellspacing="0" bgcolor="#FFFFCC" width="90%">
+      <tr>
+        <td align="center">
+          <font size="5" color="#000080"><b>Internetová zpráva financí třídy 1.E 2026</b></font><br>
+          <font size="4" color="#800000"><b>Gymnázium, Praha 6, Arabská 14</b></font><br>
+          <hr size="2" color="#000080" width="80%">
+          <font size="2" color="#008000"><b>[ VÝPIS AKTUALIZOVÁN DNE: <script>document.write(new Date().toLocaleDateString('cs-CZ'));</script> ]</b></font>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br>
+
+  <!-- ROZCESTNÍK / FILTRY (AKCE I ŽÁCI) -->
+  <center>
+    <table border="1" cellpadding="5" cellspacing="0" bgcolor="#ECECEC" width="90%">
+      <tr bgcolor="#000080">
+        <td colspan="2"><font color="#FFFFFF"><b>VYBERTE KRITÉRIA PRO ZOBRAZENÍ STAVU PLATBÍ:</b></font></td>
+      </tr>
+      <tr>
+        <td align="center" width="50%">
+          <br>
+          <font size="3"><b>FILTR DLE AKCE:</b></font><br>
+          <select id="akce-select" onchange="zmenFiltr()" class="retro-btn">
+            <option value="vse">-- Načítám akce... --</option>
+          </select>.
+          <br><br>
+        </td>
+        <td align="center" width="50%">
+          <br>
+          <font size="3"><b>FILTR DLE ŽÁKA:</b></font><br>
+          <select id="zaci-select" onchange="zmenFiltr()" class="retro-btn">
+            <option value="vse">-- Načítám žáky... --</option>
+          </select>
+          <br><br>
+        </td> <!-- Rapha <3 :3 - its ok to be gay. How i met a guy and he bacame my boyfreind :3  -->
+      </tr>
+    </table>
+  </center>
+
+  <br>
+
+  <!-- SEZNAM DLUŽNÍKŮ / STAV ŽÁKA -->
+  <center>
+    <table border="2" cellpadding="8" cellspacing="0" bgcolor="#FFFFFF" width="90%">
+      <tr bgcolor="#FF0000">
+        <td><font color="#FFFFFF" size="4"><b> INFORMACE O NEDOPLATCÍCH </b></font></td>
+      </tr>
+      <tr>
+        <td>
+          <font size="3" color="#800000"><b id="nadpis-dluznici">Probíhá komunikace s gůgelnými servery... Prosím čekejte.</b></font>
+          <hr size="1" color="#C0C0C0">
+          <ul id="dluznici-list">
+            <li>Načítání dat...</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br>
+
+  <!-- HLAVNÍ TABULKA -->
+  <center>
+    <table border="1" cellpadding="4" cellspacing="0" bgcolor="#FFFFFF" width="90%" id="hlavni-tabulka">
+      <caption align="top"><b><font size="4" color="#000080">KOMPLETNÍ TABULKA PLATBÍ TŘÍDY 1.E</font></b></caption>
+      <thead id="tabulka-hlavicka" bgcolor="#C0C0C0"></thead>
+      <tbody id="tabulka-telo"></tbody>
+    </table>
+  </center>
+
+  <br><hr size="3" color="#000080" width="90%"><br>
+
+  <!-- ZÁPATÍ A KONTAKT NA POKLADNÍKA -->
+  <center>
+    <table border="2" cellpadding="8" cellspacing="0" bgcolor="#FFFFE1" width="90%">
+      <tr>
+        <td align="center">
+          <font size="3" color="#000000">
+            <i>V případě nesrovnalostí neváhejte kontaktovat pokladníka mobilním telefonem či internetovou poštou.</i>
+          </font>
+          <br><br>
+          <font size="4" color="#000080"><b>Velmi vážený pan pokladník Lukáš Horák</b></font><br>
+          <b>Mobilní telefon:</b> <font color="#FF0000">+420 732 120 118</font><br>
+          <b>Internetová pošta:</b> <a href="mailto:l.horak.vlcr@gmail.com">l.horak.vlcr@gmail.com</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+    <font size="3" color="#808080">
+      Systém Pokladník v1.2 (c) 2026 Lukáš Horák.<br>
+      <a href="https://www.lukashorak.net" target="_blank">www.lukashorak.net</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="https://www.vzdelanylid.cz" target="_blank">www.vzdelanylid.cz</a><br>
+      Optimalizováno pro Microsoft Internet Explorer 6.0 a rozlišení 1024x768.
+    </font>
+  </center>
+
+  <script src="script.js"></script>
+</body>
+</html>

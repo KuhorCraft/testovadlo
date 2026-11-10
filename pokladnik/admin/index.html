@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADMIN – Digitální platby 1.E</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <h2>Administrace plateb 1.E</h2>
+  <p><a href="../index.html">&lt;&lt; Zpět na přehled</a></p>
+
+  <div id="prihlaseni">
+    <p>Heslo: <input type="password" id="heslo"> <button id="btn-prihlas">Přihlásit</button></p>
+  </div>
+
+  <div id="admin" style="display:none">
+
+    <h3>Platba v hotovosti</h3>
+    <p>
+      Žák: <select id="hot-zak"></select>
+      Akce: <select id="hot-akce"></select>
+      <button id="btn-hotovost">Zapsat zaplaceno v hotovosti</button>
+    </p>
+    <p id="hot-vysledek"></p>
+
+    <h3>Nová akce</h3>
+    <form id="form-akce">
+      Název: <input type="text" id="nazev" required>
+      Cena (Kč): <input type="number" id="cena" min="0" required>
+      <button type="submit">Vytvořit akci</button>
+    </form>
+    <p id="vysledek"></p>
+    <p>Akce, která už je v hlavní tabulce jako sloupec, vytvořte se stejným názvem. Dostane číslo a sloupec se nezdvojí.</p>
+
+    <h3>Akce a čísla</h3>
+    <table border="1" cellpadding="4">
+      <thead><tr><th>Číslo</th><th>Název</th><th>Cena</th></tr></thead>
+      <tbody id="akce-telo"></tbody>
+    </table>
+
+    <h3>Platby</h3>
+    <button id="btn-obnov">Obnovit</button>
+    <table border="1" cellpadding="4">
+      <thead>
+        <tr><th>Čas</th><th>VS</th><th>Žák</th><th>Akce</th><th>Volba žáka</th><th>Stav</th><th>Potvrzení</th></tr>
+      </thead>
+      <tbody id="platby-telo"></tbody>
+    </table>
+    <center><a href="https://docs.google.com/spreadsheets/d/1yaEaqaIKvMm3YZ7uqmMmW1vIRsRQhcYo9Hg7VjAYHfY/edit?usp=sharing">odkaz na gůgelnou tabulku</a></center>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyx9tM-CL5smo2dW-KBeEwz3yqg3O-0QOprWT_IVT2D5Xao6t-6RbRT2c2Fcvuvca5TiQ/exec';
+    let heslo = sessionStorage.getItem('adminHeslo') || '';
+
+    function esc(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Zápis na server s heslem (GET s parametry, viz Code.gs)
+    async function volejServer(data) {
+      try {
+        const parametry = new URLSearchParams({ ...data, heslo: heslo, t: Date.now() });
+        const odpoved = await fetch(WEB_APP_URL + '?' + parametry.toString(), { cache: 'no-store' });
+        const text = await odpoved.text();
+        if (!text) return { ok: false, chyba: 'Server neodpověděl. Zkontrolujte nasazení Apps Scriptu.' };
+        return JSON.parse(text);
+      } catch (err) {
+        return { ok: false, chyba: 'Spojení se serverem selhalo.' };
+      }
+    }
+
+    // Čtení dat ze serveru (bez mezipaměti)
+    async function nactiPrehled() {
+      const odpoved = await fetch(WEB_APP_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      return odpoved.json();
+    }
+
+    // Rozbalovací seznamy pro hotovost (zachová zvolené hodnoty)
+    function naplnVyberHotovost(data) {
+      const zakSelect = document.getElementById('hot-zak');
+      const akceSelect = document.getElementById('hot-akce');
+      const predZak = zakSelect.value;
+      const predAkce = akceSelect.value;
+
+      zakSelect.innerHTML = data.hlavni.zaci
+        .filter(z => z.jmeno !== '')
+        .map(z => `<option value="${esc(z.cislo)}">${esc(z.cislo)} – ${esc(z.jmeno)}</option>`)
+        .join('');
+
+      akceSelect.innerHTML = data.akce
+        .map(a => `<option value="${esc(a.cislo)}">${esc(a.cislo)} – ${esc(a.nazev)} (${esc(a.cena)} Kč)</option>`)
+        .join('');
+
+      if (zakSelect.querySelector(`option[value="${predZak}"]`)) zakSelect.value = predZak;
+      if (akceSelect.querySelector(`option[value="${predAkce}"]`)) akceSelect.value = predAkce;
+    }
+
+    async function obnov() {
+      try {
+        const data = await nactiPrehled();
+        naplnVyberHotovost(data);
+
+        document.getElementById('akce-telo').innerHTML = data.akce.map(a =>
+          `<tr><td>${esc(a.cislo)}</td><td>${esc(a.nazev)}</td><td>${esc(a.cena)} Kč</td></tr>`
+        ).join('');
+
+        document.getElementById('platby-telo').innerHTML = data.platby.map(p => {
+          let tlacitka = '';
+          if (p.stav === 'čeká' && p.volba === 'zaplatil') {
+            tlacitka =
+              `<button data-vs="${esc(p.vs)}" data-stav="potvrzeno">Potvrdit zaplacení</button> ` +
+              `<button data-vs="${esc(p.vs)}" data-stav="zamitnuto">Zamítnout</button>`;
+          } else if (p.stav === 'čeká') {
+            tlacitka = `<button data-vs="${esc(p.vs)}" data-stav="zamitnuto">Uzavřít (nezaplatil)</button>`;
+          }
+          return `<tr><td>${esc(p.cas)}</td><td>${esc(p.vs)}</td><td>${esc(p.jmeno)}</td>` +
+                 `<td>${esc(p.akce)}</td><td>${esc(p.volba)}</td><td>${esc(p.stav)}</td>` +
+                 `<td>${tlacitka}</td></tr>`;
+        }).join('');
+      } catch (err) {
+        document.getElementById('platby-telo').innerHTML = '<tr><td>Nepodařilo se načíst data.</td></tr>';
+      }
+    }
+
+    async function prihlas() {
+      heslo = document.getElementById('heslo').value;
+      const r = await volejServer({ funkce: 'overHeslo' });
+      if (!r.ok) {
+        heslo = '';
+        alert(r.chyba || 'Přihlášení se nezdařilo.');
+        return;
+      }
+      sessionStorage.setItem('adminHeslo', heslo);
+      zobrazAdmina();
+    }
+
+    function zobrazAdmina() {
+      document.getElementById('prihlaseni').style.display = 'none';
+      document.getElementById('admin').style.display = 'block';
+      obnov();
+      setInterval(obnov, 30000);
+    }
+
+    // Platba v hotovosti
+    document.getElementById('btn-hotovost').addEventListener('click', async () => {
+      const zakSelect = document.getElementById('hot-zak');
+      const akceSelect = document.getElementById('hot-akce');
+      const vysledekEl = document.getElementById('hot-vysledek');
+
+      if (!zakSelect.value || !akceSelect.value) {
+        vysledekEl.textContent = 'Vyberte žáka a akci.';
+        return;
+      }
+
+      const popis = `${zakSelect.selectedOptions[0].textContent}\n${akceSelect.selectedOptions[0].textContent}`;
+      if (!confirm(`Zapsat zaplaceno v hotovosti?\n${popis}`)) return;
+
+      const r = await volejServer({
+        funkce: 'hotovost',
+        cisloZaka: zakSelect.value,
+        cisloAkce: akceSelect.value
+      });
+
+      vysledekEl.textContent = r.ok
+        ? 'Zapsáno: akce je u žáka označena jako zaplacená (hotovost).'
+        : 'Chyba: ' + (r.chyba || 'neznámá chyba');
+      if (r.ok) obnov();
+    });
+
+    // Potvrzení nebo zamítnutí digitální platby
+    document.getElementById('platby-telo').addEventListener('click', async (e) => {
+      const tlacitko = e.target.closest('button[data-vs]');
+      if (!tlacitko) return;
+
+      const stav = tlacitko.dataset.stav;
+      const dotaz = stav === 'potvrzeno'
+        ? 'Potvrdit zaplacení? Do hlavní tabulky se zapíše 1 (ANO).'
+        : 'Zamítnout nebo uzavřít tuto volbu?';
+      if (!confirm(dotaz)) return;
+
+      const r = await volejServer({ funkce: 'potvrd', vs: tlacitko.dataset.vs, stav: stav });
+      if (!r.ok) alert(r.chyba);
+      obnov();
+    });
+
+    // Nová akce
+    document.getElementById('form-akce').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const r = await volejServer({
+        funkce: 'vytvorAkci',
+        nazev: document.getElementById('nazev').value,
+        cena: document.getElementById('cena').value
+      });
+      if (!r.ok) {
+        alert(r.chyba);
+        return;
+      }
+      document.getElementById('vysledek').textContent = `Akce vytvořena, číslo ${r.cislo}.`;
+      e.target.reset();
+      obnov();
+    });
+
+    document.getElementById('btn-prihlas').addEventListener('click', prihlas);
+    document.getElementById('btn-obnov').addEventListener('click', obnov);
+
+    if (heslo) zobrazAdmina();
+  </script>
+</body>
+</html>
